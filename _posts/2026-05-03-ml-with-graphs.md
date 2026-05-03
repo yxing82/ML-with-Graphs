@@ -45,3 +45,9 @@ Structure-based featurs are explored to capture topological properties of local 
 
 Three key concepts will be introduced in this section: **Node Degree** and **Clustering Coefficient**, and **Graphlet Degree Vector**.
 
+#### Node Degree
+
+#### Clustering Coefficient
+
+### Graphlet Degree Vector (GDV)
+
