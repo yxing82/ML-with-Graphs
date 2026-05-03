@@ -18,8 +18,19 @@ In this post, we will talk about 3 types of predictions about the Graph:
 - Link-level prediction
 - Graph-level prediction
 
-## Section 2
+## Node-level Prediction
 
-$$
-\mathcal{L} = \sum_{i=1}^{N} \ell(y_i, \hat{y}_i)
-$$
+- Task: Mainly focus on node classifications based on features.
+- Goal: 
+    - Characterise network structure
+    - Identify the node position in the network
+
+Researches are focused on 2 features: 
+1. Importance-based features
+2. Structure-based features
+
+### Importance-based features
+
+For importance-based features, the main question is "_How to identify the importance of a certain node?_"
+
+
