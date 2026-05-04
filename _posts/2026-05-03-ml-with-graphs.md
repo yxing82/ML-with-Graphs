@@ -6,6 +6,14 @@ tags: [graphs, ml]
 math: true
 ---
 
+# CS224W: Machine Learning with Graphs — Learning Notes
+
+> **Course:** Stanford CS224W (Winter 2021)
+> **Instructor:** Prof. Jure Leskovec
+> **Lectures Covered:** 1.1 – 2.3 (Traditional Feature-based Methods)
+
+---
+
 ## 1. Traditional Machine learning
 
 For traditional machine learning, people basically work on capturing features to make predictions. Specifically, researchers use hand-designed features.
