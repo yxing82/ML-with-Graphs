@@ -849,4 +849,39 @@ Learn a low-dimensionality embedding for each anonymous walk pattern alongside t
 
 - $$\mathbf{z}_G \in \mathbb{R}^{d_g}$$: the graph embedding vector
 
-- 
+- $$\mathbf{z}_i \in \mathbb{R}^{d_a}$$: the embedding of anonymous walk $$w_i$$
+
+- $\Delta$: window size. Walks that start from the same node within $\Delta$ positions of each other are considered co-occurring.
+
+**Objective:** given the context walks within a $\Delta$-sized window and the graph embedding, predict the target walk:
+
+$$
+\max_{\mathbf{Z}, \mathbf{z}_G} \;\; \frac{1}{T} \sum_{t=\Delta}^{T-\Delta} \log P\left(w_t \;\middle|\; w_{t-\Delta}, \ldots, w_{t+\Delta}, \mathbf{z}_G \right)
+$$
+
+- $T$: total number of walks sampled in the sequence
+- $t$: current index/position in $T$ walks
+- $$w_t$$: specific target ealk currently looking at
+- $\Delta$: size of context/neighbourhood
+
+> **Example:** If $\Delta = 1$, we will look at the exact one walk before the target walk ($$w_{t-1}$$) and the exact one walk after ($$w_{t+1}$$).
+
+, where the probability is computed via softmax:
+
+$$
+P\left(w_t \;\middle|\; \{w_{t-\Delta}, \ldots, w_{t+\Delta}, \mathbf{z}_G\}\right) = \frac{\exp(y(w_t))}{\sum_{i=1}^{\eta} \exp(y(w_i))}
+$$
+
+> Notion: This is the probability of seeing target walk ($$w_{t}$$), given the surrounding walk contexts and the overall graph embedding.
+
+, and the score function $$y(w_t)$$ is:
+
+$$
+y(w_t) = b + U \cdot \text{cat}\left( \frac{1}{2\Delta} \sum_{i=-\Delta, i \neq 0}^{\Delta} \mathbf{z}_{t+i}, \;\; \mathbf{z}_G \right)
+$$
+
+That is - Average the embeddings of the context walks, concatenate with the graph embedding, and pass through a linear layer $(U, b)$.
+
+
+**Training Procedure:**
+
