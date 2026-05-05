@@ -2,7 +2,7 @@
 title: "Learning Notes on Machine Learning with Graphs (Updating)"
 date: 2026-05-03
 categories: [Notes, Machine Learning]
-tags: [graphs, ml, random walk]
+tags: [graphs, ml, random walk, node embedding, graph embedding]
 math: true
 ---
 
@@ -10,7 +10,7 @@ math: true
 
 > **Instructor:** Prof. Jure Leskovec
 
-> **Lectures Covered:** 1.1 – 3.2 
+> **Lectures Covered:** 1.1 – 3.3 
 
 <br>
 
@@ -354,7 +354,7 @@ The rest of the course (Lectures 3+) addresses this by introducing methods that 
 <br>
 <br>
 
-# 3. Node Embeddings: Foundations
+# 3. Node Embeddings
 
 <br>
 
@@ -632,7 +632,7 @@ $$
         - Their dot products increase for the next time 
 
     - Sample **fake** node pairs $\rightarrow$ Calculate the dot product and squash it with the sigmoid function to get the probability $p$ $\rightarrow$ Get the error between the target and the function result $\rightarrow$ Update in the embedding matrix $\mathbf{Z}$ for both nodes
-        - Visual result: fake nodes are **pushes apart** in the embedding space 
+        - Visual result: fake nodes are **pushed apart** in the embedding space 
         - Their dot products decrease for the next time 
 
 7. **Convergence:** continue until the loss stops decreasing meaningfully. At this point, the embedding matrix $\mathbf{Z}$ has stabilised.
@@ -712,3 +712,141 @@ $$
 | Softmax (multi-class) | $P(v \mid \mathbf{z}_u) = \frac{\exp(\mathbf{z}_u^\top\mathbf{z}_v)}{\sum_n\exp(\mathbf{z}_u^\top\mathbf{z}_n)}$ |
 | Negative sampling (binary) |  $$\approx -\log(\sigma(\mathbf{z}_u^\top\mathbf{z}_v)) - \sum_{i=1}^k\log(\sigma(-\mathbf{z}_u^\top\mathbf{z}_{n_i}))$$ |
 | Node2vec bias ($d_{ux}=0,1,2$) | Weights: $\frac{1}{p}$, $1$, $\frac{1}{q}$ |
+
+
+<br>
+<br>
+<br>
+
+# 4. Graph Embeddings
+
+<br>
+
+## 4.1 Problem Definition
+
+To predict the **entire graph** (or **subgraph**), we want to embed it into a single vector:
+
+$$
+f: G \rightarrow \mathbf{z}_{G} \in \mathbb{R}^{d}
+$$
+
+Typical tasks include (1) classifying toxic vs. non-toxic molecules; (2) identify anomalous graphs; (3) compare graph similarity.
+
+**Core challenges:** How to collapse the variable-size structure of a whole graph into a fixed-length vector, preserving meanful structural information?
+
+<br>
+
+## 4.2 Approaches to Graph Embedding
+
+***How to aggregate node-level information into a graph-level representation?***
+
+### Approach 1 - Aggregate Node Embeddings
+
+- **Strategy:** Run any node embedding method (DeepWalk, Node2Vec, etc.) on $G$, then sum (or average) all node embeddings:
+
+$$
+\mathbf{z}_{G} = \sum_{v \in G} \mathbf{z}_{v} \quad \text{or} \quad \mathbf{z}_{G} = \frac{1}{\vert V \vert} \sum_{v \in G} \mathbf{z}_{v}
+$$
+
+- **Strengths:** Trivially simple, works with any existing node embedding, no additional training needed.
+
+- **Weakness:** Sum/Avg are very lossy compressions. They destroy information about how nodes relate to each other within the graph. Two sturcturally very different graphs could produce identical sums if their node embeddings happen to average out the same way.
+
+
+### Approach 2 - Virtue Node
+
+- **Strategy:** Introduce a virtual node, which is connected to all nodes in the (sub)graph to be embeded. Then run a standard node embedding. The embedding of the virtual node is the graph embedding $\mathbf{z}_{G}$.
+
+- **Strengths:** Leverage the existing node embedding withou modification. Since the virtual node is adjacent to every node in $G$, random walks starting from it will traverse the whole graph, naturally aggregating information from all nodes.
+
+- **Weakness:** Adding a node connected to everything changes the graph topology, can distort the original graph structure.
+
+### Approach 3 - Anonymous Walk Embeddings (AWE)
+
+*More details in §4.3.*
+
+<br>
+
+## 4.3 Anonymous Walks
+
+### Definition
+
+An **anonymous walk** strips away node identities (e.g. node $A, B, C$) and replace them with the index recores the order where each node was first encountered (**first-visit indices**).
+
+> **Example:** A random walk visits nodes $$A \rightarrow B \rightarrow C \rightarrow B \rightarrow D$$.
+> - $A$ is the 1st new node $\rightarrow$ index **1**
+> - $B$ is the 2nd new node $\rightarrow$ index **2**
+> - $C$ is the 3rd new node $\rightarrow$ index **3**
+> - $B$ was already seen $\rightarrow$ index 2
+> - $D$ is the 4th new node $\rightarrow$ index **4**
+> Anonymous walk will be $$(1, 2, 3, 2, 4)$$.
+
+With such **agnostic to node identity** walks, two graphs with completely different node labels but the same topology will produce the same anonymous walk distributions.
+
+### Counting Anonymous Walks
+
+For a given walk length $l$, there is a finite set of possible anonymous walks. This limits how long the walks can be before the representation becomes unwieldy.
+
+Anonymous walks follow a strict chronological rule: whenever stepping onto a node that haven't been visited yet, assign it the **lowest unused positive integer**. Therefore, it doesn't allow to skip numbers (e.g. 1, 1, 3). 
+
+> **Example:** with $l = 3$ (3 steps), all 5 possible anonymous walks are:
+> $$
+> w_1 = 111, \quad w_2 = 112, \quad w_3 = 121, \quad w_4 = 122, \quad w_5 = 123
+> $$
+
+Essentially, the number of *distinct* anonymous walks grows **exponentially** with length $l$ (Bell Numbers):
+
+| Walk length $l$ | Number of anonymous walks $\eta$ |
+|---|---|
+| 1 | 1 |
+| 2 | 2 |
+| 3 | 5 |
+| 4 | 15 |
+| 5 | 52 |
+| 6 | 203 |
+| 7 | 877 |
+
+<br>
+
+## 4.4 Two Uses of Anonymous Walks for Graph Embedding
+
+### Feature-based (Simple Counting)
+
+Simulate $m$ anonymous walks of length $l$ starting from every node in $G$. Record the fraction of times each anonymous walk pattern $$w_i$$ occurs. The graph embedding is then this **probability distribution** over walk patterns:
+
+$$
+\mathbf{z}_{G}[i] = \text{probability of anonymous walk} w_i \text{occurring in} G
+$$
+
+> **Example:** For $l = 3$ with 5 possible walks, $$\mathbf{z}_G$$ is a 5-dimensional vector whose entries sum to 1.
+
+To make the empirical distribution be $\epsilon$-close to the true distribution with probability $\geq 1 - \delta$, the numner of sample is:
+
+$$
+m = \left\lceil \frac{2}{\epsilon^2} \left( \log (2^\eta -2) - \log (\delta) \right) \right\rceil
+$$
+
+, where $\eta$ is the total number of anonymous walks.
+
+- **Strengths:** 
+    - Completely unsupervised;
+    - No learning required beyond sampling;
+    - Produces a fixed-size representation.
+
+- **Weakness:** 
+    - The representation is purely count-based. It doesn't learn which walk pattern are important for a given task. 
+    - The dimensionality ($\eta$) grows exponentially.
+
+
+
+### Data-driven (Learn Walk Embedding)
+
+Learn a low-dimensionality embedding for each anonymous walk pattern alongside the graph embedding. 
+
+**Goal:** Predict contect walks from co-occurring walks.
+
+**Setup:** 
+
+- $$\mathbf{z}_G \in \mathbb{R}^{d_g}$$: the graph embedding vector
+
+- 
