@@ -562,25 +562,25 @@ $$
 
 , where:
 
-- $\mathbf{z}_{u}^\top \mathbf{z}_{u}$ is the raw similarity score between node $u$ and $v$.
+- \( \mathbf{z}_{u}^\top \mathbf{z}_{u} \) is the raw similarity score between node \( u \) and \( v \).
 
-- $\exp (\mathbf{z}_{u}^\top \mathbf{z}_{u})$ makes the similarity score *strictly positive* to generate the probability output.
+- \( \exp (\mathbf{z}_{u}^\top \mathbf{z}_{u}) \) makes the similarity score *strictly positive* to generate the probability output.
 
-- $\sum_{n \in V} \exp (\mathbf{z}_{u}^\top \mathbf{z}_{n})$ calculate similarity scores between node $u$ and every other node in the graph. This ensures the output is a clean percentage in $(0, 1)$.
+- \( \sum_{n \in V} \exp (\mathbf{z}_{u}^\top \mathbf{z}_{n}) \) calculate similarity scores between node \( u \) and every other node in the graph. This ensures the output is a clean percentage in \( (0, 1) \).
 
-- $P(v \mid \mathbf{z}_{u})$ sums to 1 and all entries are positive, making it a valid probability distribution.
+- \( P(v \mid \mathbf{z}_{u}) \) sums to 1 and all entries are positive, making it a valid probability distribution.
 
-- $P(v \mid \mathbf{z}_{u})$ is a monotonic function, where higher $\mathbf{z}_{u}^\top \mathbf{z}_{n}$ implies higher $P(v \mid \mathbf{z}_{u})$.
+- \( P(v \mid \mathbf{z}_{u}) \) is a monotonic function, where higher \( \mathbf{z}_{u}^\top \mathbf{z}_{n} \) implies higher \( P(v \mid \mathbf{z}_{u}) \).
 
 
-**Problem:** the denominator requires summing over every node pair in the graph. For each training pair $(u, v)$, this is $O(\vert V \vert)$, and across all pairs it becomes $O(\vert V \vert)^{2}$. Intractable for large graphs.
+**Problem:** the denominator requires summing over every node pair in the graph. For each training pair \( (u, v) \), this is \( O(\vert V \vert) \), and across all pairs it becomes \( O(\vert V \vert)^{2} \). Intractable for large graphs.
 
 **Solution:** Negative Sampling.
 
 
 ### Negative Sampling 
 
-Instead of asking "is node $v$ the most similar node to $u$, out of all $\vert V \vert$ nodes?" (Softmax), we ask "can we distinguish the real neighbour $v$ from $K$ random imposters?" (**Binary Cross-Entropy Approximation**).
+Instead of asking "is node \( v$ the most similar node to \( u$, out of all \( \vert V \vert$ nodes?" (Softmax), we ask "can we distinguish the real neighbour \( v$ from \( K$ random imposters?" (**Binary Cross-Entropy Approximation**).
 
 We approximate the softmax loss with:
 
