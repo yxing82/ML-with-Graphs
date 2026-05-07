@@ -1,14 +1,21 @@
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    if (document.querySelector('#toc')) {
-      tocbot.init({
-        tocSelector: '#toc',
-        contentSelector: '.post-content',
-        headingSelector: 'h1, h2, h3', /* This is the magic line */
-        hasInnerContainers: true,
-        scrollSmooth: false,
-        tocScrollOffset: 80
-      });
-    }
+  window.addEventListener('load', function() {
+    // Wait slightly to ensure Chirpy's core JS has fully finished executing
+    setTimeout(function() {
+      if (typeof tocbot !== 'undefined' && document.querySelector('#toc')) {
+        // 1. Destroy the default TOC that Chirpy just built
+        tocbot.destroy();
+        
+        // 2. Rebuild it and force it to scan for h1, h2, and h3
+        tocbot.init({
+          tocSelector: '#toc',
+          contentSelector: '.post-content',
+          headingSelector: 'h1, h2, h3',
+          hasInnerContainers: true,
+          scrollSmooth: false,
+          tocScrollOffset: 80
+        });
+      }
+    }, 500); // 500 millisecond delay to win the race condition
   });
 </script>
