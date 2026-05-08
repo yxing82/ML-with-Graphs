@@ -51,14 +51,13 @@
   }
 }
 
-/* Override tip to grey note style */
-blockquote.prompt-tip::before {
+blockquote.prompt-info::before {
   content: "\f303" !important;
   font: var(--fa-font-solid) !important;
   color: #9ca3af !important;
 }
 
-blockquote.prompt-tip {
+blockquote.prompt-info {
   border-left-color: #9ca3af !important;
   background-color: rgba(156, 163, 175, 0.08) !important;
 }
