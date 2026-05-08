@@ -882,7 +882,7 @@ $$
 
 > **Example:** 
 >
-> If $\Delta = 1$, we will look at the exact one walk before the target walk ($$w_{t-1}$$) and the exact one walk after ($$w_{t+1}$$).
+> If $\Delta = 1$, we will look at the exact one walk before the target walk ($$w_{t-1}$$) and the exact one after ($$w_{t+1}$$).
 {: .prompt-example }
 
 , where the probability is computed via softmax:
