@@ -891,13 +891,13 @@ $$
 P\left(w_t \;\middle|\; \{w_{t-\Delta}, \ldots, w_{t+\Delta}, \mathbf{z}_G\}\right) = \frac{\exp(y(w_t))}{\sum_{i=1}^{\eta} \exp(y(w_i))}
 $$
 
-> **Tips:** This is the probability of seeing target walk ($$w_{t}$$), given the surrounding walk contexts and the overall graph embedding.
-{: .prompt-info }
+> This is the probability of seeing target walk ($$w_{t}$$), given the surrounding walk contexts and the overall graph embedding.
+{: .prompt-tip }
 
-> **Tips:** For the whole graph embedding learning process, 
+> For the whole graph embedding learning process, 
 >   - $\mathbf{z}_G$ is the global clue, meaning a completely separate, special vector of the entire graph. It's treated a shared context for all walks in the graph.
 >   - $$w_{t-\Delta}$$ are local clues, representing local structures.
-{: .prompt-info }
+{: .prompt-tip }
 
 , and the score function $$y(w_t)$$ is:
 
