@@ -786,7 +786,7 @@ An **anonymous walk** strips away node identities (e.g. node $A, B, C$) and repl
 > - $B$ was already seen $\rightarrow$ index 2
 > - $D$ is the 4th new node $\rightarrow$ index **4**
 > Anonymous walk will be $$(1, 2, 3, 2, 4)$$.
-{: .prompt-tip }
+{: .prompt-example }
 
 With such **agnostic to node identity** walks, two graphs with completely different node labels but the same topology will produce the same anonymous walk distributions.
 
@@ -800,7 +800,7 @@ Anonymous walks follow a strict chronological rule: whenever stepping onto a nod
 > $$
 > w_1 = 111, \quad w_2 = 112, \quad w_3 = 121, \quad w_4 = 122, \quad w_5 = 123
 > $$
-{: .prompt-tip }
+{: .prompt-example }
 
 Essentially, the number of *distinct* anonymous walks grows **exponentially** with length $l$ (Bell Numbers):
 
@@ -827,7 +827,7 @@ $$
 $$
 
 > **Example:** For $l = 3$ with 5 possible walks, $$\mathbf{z}_G$$ is a 5-dimensional vector whose entries sum to 1.
-{: .prompt-tip }
+{: .prompt-example }
 
 To make the empirical distribution be $\epsilon$-close to the true distribution with probability $\geq 1 - \delta$, the numner of sample is:
 
@@ -874,7 +874,7 @@ $$
 - $\Delta$: size of context/neighbourhood
 
 > **Example:** If $\Delta = 1$, we will look at the exact one walk before the target walk ($$w_{t-1}$$) and the exact one walk after ($$w_{t+1}$$).
-{: .prompt-tip }
+{: .prompt-example }
 
 , where the probability is computed via softmax:
 
