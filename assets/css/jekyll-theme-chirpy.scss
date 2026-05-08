@@ -58,6 +58,8 @@
 }
 
 blockquote.prompt-tip::before {
-  color: #9ca3af !important;
   content: "\f303" !important;
+  color: #9ca3af !important;
+  font-family: 'Font Awesome 6 Free' !important;
+  font-weight: 900 !important;
 }
