@@ -779,7 +779,8 @@ $$
 
 An **anonymous walk** strips away node identities (e.g. node $A, B, C$) and replace them with the index recores the order where each node was first encountered (**first-visit indices**).
 
-> **Example:** A random walk visits nodes $$A \rightarrow B \rightarrow C \rightarrow B \rightarrow D$$.
+> **Example:** 
+> A random walk visits nodes $$A \rightarrow B \rightarrow C \rightarrow B \rightarrow D$$.
 > - $A$ is the 1st new node $\rightarrow$ index **1**
 > - $B$ is the 2nd new node $\rightarrow$ index **2**
 > - $C$ is the 3rd new node $\rightarrow$ index **3**
@@ -796,7 +797,8 @@ For a given walk length $l$, there is a finite set of possible anonymous walks. 
 
 Anonymous walks follow a strict chronological rule: whenever stepping onto a node that haven't been visited yet, assign it the **lowest unused positive integer**. Therefore, it doesn't allow to skip numbers (e.g. 1, 1, 3). 
 
-> **Example:** with $l = 3$ (3 steps), all 5 possible anonymous walks are:
+> **Example:** 
+> with $l = 3$ (3 steps), all 5 possible anonymous walks are:
 > $$
 > w_1 = 111, \quad w_2 = 112, \quad w_3 = 121, \quad w_4 = 122, \quad w_5 = 123
 > $$
@@ -826,7 +828,8 @@ $$
 \mathbf{z}_{G}[i] = \text{probability of anonymous walk} w_i \text{occurring in} G
 $$
 
-> **Example:** For $l = 3$ with 5 possible walks, $$\mathbf{z}_G$$ is a 5-dimensional vector whose entries sum to 1.
+> **Example:** 
+> For $l = 3$ with 5 possible walks, $$\mathbf{z}_G$$ is a 5-dimensional vector whose entries sum to 1.
 {: .prompt-example }
 
 To make the empirical distribution be $\epsilon$-close to the true distribution with probability $\geq 1 - \delta$, the numner of sample is:
@@ -873,7 +876,8 @@ $$
 - $$w_t$$: specific target ealk currently looking at
 - $\Delta$: size of context/neighbourhood
 
-> **Example:** If $\Delta = 1$, we will look at the exact one walk before the target walk ($$w_{t-1}$$) and the exact one walk after ($$w_{t+1}$$).
+> **Example:** 
+> If $\Delta = 1$, we will look at the exact one walk before the target walk ($$w_{t-1}$$) and the exact one walk after ($$w_{t+1}$$).
 {: .prompt-example }
 
 , where the probability is computed via softmax:

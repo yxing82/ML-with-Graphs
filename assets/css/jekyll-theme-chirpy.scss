@@ -55,9 +55,9 @@
 .prompt-tip {
   border-left-color: #9ca3af !important;
   background-color: rgba(156, 163, 175, 0.08) !important;
+}
 
-  &::before {
-    color: #9ca3af !important;
-    content: "\f249" !important; /* pen-fancy icon */
-  }
+blockquote.prompt-tip::before {
+  color: #9ca3af !important;
+  content: "\f303" !important;
 }
