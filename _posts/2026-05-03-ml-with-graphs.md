@@ -2,7 +2,7 @@
 title: "Learning Notes on Machine Learning with Graphs (Updating)"
 date: 2026-05-03
 categories: [Notes, Machine Learning]
-tags: [graphs, ml, random walk, node embedding, graph embedding]
+tags: [graphs, ml, random walk, node embedding, graph embedding, pagerank]
 math: true
 ---
 
@@ -10,7 +10,7 @@ math: true
 
 > **Instructor:** Prof. Jure Leskovec
 
-> **Lectures Covered:** 1.1 – 3.3 
+> **Lectures Covered:** 1.1 – 4.2 
 
 <br>
 
@@ -165,7 +165,7 @@ Ranges from 0 (no edges among neighbours) to 1 (neighbours form a complete cliqu
 
 > **Problems with Bipartite Graphs:** 
 >
-> * Triangles can NEVER form: if $u_{1} \in U$ connects to $v_{1} \in V$ and $v_{2} \in V$, the edge $(v_{1}, v_{2})$ cannot exist because both are in the same set $V$.
+> Triangles can NEVER form: if $u_{1} \in U$ connects to $v_{1} \in V$ and $v_{2} \in V$, the edge $(v_{1}, v_{2})$ cannot exist because both are in the same set $V$.
 >
 > The standard Clustering Coefficient is then always **zero** for every node in a bipartite graph
 > 
@@ -972,3 +972,93 @@ That is - Average the embeddings of the context walks, concatenate with the grap
 | Sample size for feature-based AWE | $$m = \lceil \frac{2}{\varepsilon^2}(\log(2^\eta - 2) - \log(\delta)) \rceil$$ |
 | Data-driven AWE objective | $$\max \frac{1}{T} \sum_{t=\Delta}^{T-\Delta} \log P(w_t \mid w_{t-\Delta}, \ldots, w_{t+\Delta}, \mathbf{z}_G)$$ |
 | Walk prediction score | $$y(w_t) = b + U \cdot \text{cat}\left(\frac{1}{2\Delta}\sum \mathbf{z}_i, \; \mathbf{z}_G\right)$$ |
+
+
+<br>
+<br>
+<br>
+
+## 6. PageRank
+
+<br>
+
+### 6.1 Link Analysis Approach(Algorithm)
+
+The Web can be modelled as a **Directed Graph**, where nodes are web pages and edges are hyperlinks.
+
+However, not all web pages are equally important. The key insight behind the PageRank is *"Treating Links as Votes"*. Specifically, in-links are votes for importance, and a vote from an important page counts more.
+
+**Recursive Definition:** 
+
+- Page $j$'s importance depends on the importance of pages that point to it
+
+- Each page distributes its importance equally across its out-links.
+
+Formally, the **PageRank** $r_j$ of page $j$ is defined by the **flow equation**:
+
+$$
+r_j = \sum_{i \righarrow j} \frac{r_i}{d_i}
+$$
+
+, where $d_i$ is the out-degree of node $i$ and the sum runs over all nodes $i$ that link to $j$.
+
+<br>
+
+### 6.2 Three Equivalent Formulations
+
+PageRank can be understood from three different angles, which all lead to the same solution.
+
+### Formulation 1 - Matrix
+
+Define the **stochastic adjacency matrix** $M$ as:
+
+- If page $j$ has $d_j$ out-links and $j \rightarrow i$, then $$M_{ij} = \frac{1}{d_j}$$
+
+- $M$ is **column stochastic**, where each column sums to 1
+
+The flow equation can then be written as:
+
+$$
+\mathbf{r} = M \cdot \mathbf{r}
+$$
+
+, where $\mathbf{r}$ is the **eigenvector** of $M$ corresponding to eigenvalue of 1. We can also refer $\mathbf{r}$ as the **principal eigenvector**.
+
+### Formulation 2 - Random Walk
+
+Imagine a random surfer on the Web:
+
+1. At time $t$, the surfer is on some page $i$
+
+2. At time $t+1$, the surfer follows one of $i$'s out-links uniformly at random
+
+3. This repeats indefinitely
+
+Let $\mathbf{p}(t)$ be the probability distribution over pages at time $t$, then $\mathbf{p}(t+1) = M \cdot \mathbf{p}(t)$.
+
+As $t \rightarrow \infty$, the surfer reaches a stationary distribution $\mathbf{p}$, satisfying $\mathbf{p} = M \cdot \mathbf{p}$.
+
+> $\mathbf{p}$ is exactly the PageRank vector
+{: .prompt-tip }
+
+> A page's PageRank = the fraction of time the random surfer spends on it in the long run.
+{: .prompt-tip }
+
+### Formulation 3 - Power Iteration
+
+Given $\mathbf{r} = M \cdot \mathbf{r}$, we can compute $\mathbf{r}$ iteratively:
+
+1. **Initialise:** $$\mathbf{r}^{(0)} = \left[\frac{1}{N}, \frac{1}{N}, \ldots, \frac{1}{N}\right]^T$$
+
+2. **Iterate:** $$\mathbf{r}^{(t+1)} = M \cdot \mathbf{r}^{(t)}$$
+
+3. **Stops when:** $$\| \mathbf{r}^{(t+1)} - \mathbf{r}^{(t)} \|_1 < \epsilon$$
+
+Repeatedly multiplying by $M$ amplifies the component along the principal aigenvector, while all other components decay.
+
+> In practice, this process converges within about 50-100 iterations.
+{: .prompt-tip }
+
+<br>
+
+### 6.3 Two Problems with Power Iteration
