@@ -1114,21 +1114,21 @@ Typically, $$\beta \in [0.8, 0.9]$$.
 >
 > Teleporttion guarantees both properties.
 >
-> irreducible: any state reachable from any other
-> aperiodic: no fixed-period cycles
+> - irreducible: any state reachable from any other
+> - aperiodic: no fixed-period cycles
 {: .prompt-info }
 
 <br>
 
 ### 6.5 The Google Matrix
 
-Incorporating teleportation, the PageRank equation becomes:
+Incorporating teleportation, the **PageRank equation** becomes:
 
 $$
 r_j = \sum_{i \rightarrow j} \beta \cdot \frac{r_i}{d_i} + (1 - \beta) \cdot \frac{1}{N}
 $$
 
-In matrix form, define the Google Matrix $A$ as:
+In matrix form, define the **Google Matrix** $A$ as:
 
 $$
 A = \beta M + (1 - \beta) \cdot \frac{1}{N} \mathbf{e}\mathbf{e}^{T}
@@ -1136,7 +1136,7 @@ $$
 
 , where $$\mathbf{e}$$ is the vector of all ones.
 
-The PageRank vector satisfies:
+The **PageRank vector** satisfies:
 
 $$
 \mathbf{r} = A \cdot \mathbf{r}
