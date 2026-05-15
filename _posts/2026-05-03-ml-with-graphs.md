@@ -1277,7 +1277,9 @@ Specifically, Correlation involve two concepts - **Homophily** and **Influence**
 
 - Influence: connected nodes affect each other over time.
 
-> $$\text{individual characteristic} \xrightleftharpoons[\text{Influence}]{\text{Homophily}} \text{social connections}$$
+> $$
+> \text{individual characteristic} \xrightleftharpoons[\text{Influence}]{\text{Homophily}} \text{social connections}
+> $$
 > {: .prompt-info }
 
 Under the Markov Assumption, the label $Y_v$ of node $v$ depends on labels of it's first-degree neighbours $N_v$:
@@ -1307,9 +1309,11 @@ The class probability of node $v$ is the weighted average of class probabilities
 For a node $v$ with neighbours $N_v$, the probability that $v$ belongs to class $c$ is updated as
 
 <a id="eq-prc"></a>
+\begin{equation}
 $$
 P(Y_v = c) = \frac{1}{\sum_{(v,u) \in E} W(v,u)} \sum_{(v,u) \in E} W(v,u) \cdot P(Y_u = c) \tag{1}\label{eq-prc}
 $$
+\end{equation}
 
 , where $W(v,u)$ is the edge weight between $v$ and $u$.
 
@@ -1356,8 +1360,112 @@ $$
 
 , where 
 - $$\mathbf{f}_v$$ is the node $v$'s own feature vector
-- $$\mathbf{z}_v$$ is a summary vector of labels/features of $v$'s neighbours, computed via aggregation
+- $$\mathbf{z}_v$$ is a **summary vector** of labels/features of $v$'s neighbours, computed via aggregation
 
-**Architecture:**
-- Phase 1 [training]
+**Construction of summary vector $$\mathbf{z}_v$$:**
 
+The summary is computed as the histogram of label counts in $$N_v$$ of node $v$. Crucially, for directed graphs, $$\mathbf{z}_v$$ can be splitted by incoming and outgoing neighbourhoods 
+
+$$
+\mathbf{z}_v = [\mathbf{I}_v, \mathbf{O}_v]
+$$
+
+, where 
+- $$\mathbf{I}_v$$ is summary vector of incoming neighbour label information (nodes that point to $v$)
+
+    $$
+    I_v \in \mathbb{R}^{k} where I_v[c] = \text{number/proportion of incoming neighbours with label c}
+    $$
+
+- $$\mathbf{O}_v$$ is summary vector of outgoing neighbour label information (nodes that point from $v$)
+    $$
+    O_v \in \mathbb{R}^{k} where O_v[c] = \text{number/proportion of outgoing neighbours with label c}
+    $$
+
+**Phase 1 (Local Training)**
+1. Train both classifiers on labelled training set
+
+- $$\phi_1$$: Base classifier using node features only - How to map a node $v$'s individual features $$\mathbf{f}_v$$ to the correct label $$Y_v$$.
+- $$\phi_2$$: Relational classifier using node feature and neighbour label summary - How to map both node $v$'s features $$\mathbf{f}_v$$ and its neighbours' labels $$\mathbf{N}_v$$ to the correct label $$Y_v$$.
+   
+> unlabelled nodes play zero role in the training.
+>
+> During the training, all labels are known, $$\mathbf{z}_v$$ can be computed exactly.
+{: .prompt-tip }
+
+2. Initialise unlabelled nodes 
+    Apply **$$\phi_1$$** to all unlabelled nodes. This will make initial, "best guess" predictions $$ Y_v$$ for all unlabelled nodes. Similar to the mechanism of [Prbabilistic Relational Classifier](#prbabilistic-relational-classifier), every node in the graph has label, either a ground-truth label or an initial predicted label.
+
+**Phase 2 (Iteration)**
+
+Repeat until convergence or max iterations:
+1. Update $$\mathbf{z}_v$$ for every node:
+    Recompute $$I_v$$ and $$O_v$$ using current predicted labels $$Y_u$$ of $v$'s neighbours
+
+2. Re-classify each node $v$:
+    Compute $$Y_v = \phi_2(\mathbf{f}_v, \mathbf{z}_v)$$
+
+As predictions improve each round, the neighbour summarises $$\mathbf{z}_v$$ become more accurate, which improves the next round of predictions
+
+
+**Key Properties:**
+- Use both node features and network structure, stricly more information than the Relational Classifier
+
+- Convergence is still not guaranteed
+
+- Choice of $$\mathbf{z}_v$$ is problem-specific. Separate into incoming and outgoing for directed graphs. Single summary is sufficient for undirected graphs.
+
+-  The two-classifiers deign cleanly separate "what do I know about myself?" ($$\phi_1$$) and "What do my neighbours tell me?" ($$\phi_2$$)
+
+
+### Loopy Belief Propagation
+
+Belief Propagation (BP) is a **dynamic programming approach** where nodes **pass messages** to neighbours about their beliefs regarding each other's labels. 
+
+**Notation:**
+ 
+| Symbol | Meaning |
+|---|---|
+| $$\psi(Y_i, Y_j)$$ | **Label-label potential matrix.** <br> $$\psi(Y_i, Y_j) = P(Y_j = b \mid Y_i = a)$$ <br> Probability that neighbor $j$ is in state $b$ given $i$ is in state $a$. Encodes the correlation between neighbors. |
+| $$\phi(Y_i)$$ | **Prior belief** (node feature prior). <br> Probability of node $i$ being in state $$Y_i$$. |
+| $$m_{i \to j}(Y_j)$$ | **Message** from $i$ to $j$ <br> node $i$'s estimate of the probability that $j$ is in state $$Y_j$$. |
+| $$\mathcal{L}$$ | The set of all possible labels. |
+
+**Message Update Rule:**
+The message from node $i$ to $j$ for state $$Y_j$$ is
+
+$$
+m_{i \rightarrow j} (Y_j) = \sum_{Y_i \in \mathcal{L}} \psi(Y_i, Y_j) \cdot \phi_{i}(Y_i) \cdot \prod_{k \in N_i \setminus j} m_{i \rightarrow j} (Y_i)
+$$
+
+To compute what $i$ tells $j$, node $i$ considers
+- label-label compatibility between $i$ and $j$
+- its own prior
+- all messages it received from other neighbours, **excluding $j$**
+
+
+**Algorithm:**
+1. **Initialise:** Set all messages $$m_{i \rightarrow j} (Y_j) = 1$$ for all edges and all states
+
+2. **Iterate:** For each edge $(i,j)$, compute $$m_{i \rightarrow j} (Y_j)$$ with the Update Rule
+
+3. **Repeat** until convergence
+
+4. **Final Belief:** After convergence, compute node $i$'s belief of being in state Y_i as 
+$$
+b_i(Y_i) = \kappa \cdot \phi_i(Y_i) \prod_{j \in N_i} m_{j \rightarrow i} (Y_i)
+$$
+, where $\kappa$ is a normalising constant.
+
+| Advantage | Limitation |
+|---|---|
+| Easy to code up | Convergence is not guaranteed |
+| Can apply to any graphical model with any form of potentials, including high-order | For graphs with cycles, messages will be in a loop <br> Loopy BP is then an approximation, not exact inference |
+
+### Summary and Comparison
+
+| Method | Uses Node Features? | Uses Network Structure? | Convergence Guaranteed? |
+|---|---|---|---|
+| Probabilistic Relational Classifier | No | Yes <br> (neighbor labels) | No |
+| Iterative Classification | Yes | Yes <br> (neighbor labels + features) | No |
+| Belief Propagation | Yes (as priors) | Yes <br> (message passing) | No <br> (approximate on loopy graphs) |
